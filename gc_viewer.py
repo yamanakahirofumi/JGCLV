@@ -1,5 +1,6 @@
 import re
 import argparse
+import json
 from bokeh.plotting import figure, output_file, save
 from bokeh.layouts import column
 from bokeh.models import ColumnDataSource, HoverTool
@@ -48,6 +49,63 @@ def parse_gc_log(file_path, log_format):
                 data.append(item)
     
     return data
+
+def generate_notebook_code(data):
+    data_json = json.dumps(data, indent=4)
+    code = f"""
+from bokeh.plotting import figure, show, output_notebook
+from bokeh.layouts import column
+from bokeh.models import ColumnDataSource, HoverTool
+
+# Initialize notebook output
+output_notebook()
+
+# GC Data
+data = {data_json}
+
+# Convert list of dicts to dict of lists for ColumnDataSource
+source_data = {{k: [d[k] for d in data] for k in data[0].keys()}}
+source = ColumnDataSource(source_data)
+
+# Plot 1: Heap Usage
+p1 = figure(title="Heap Usage Over Time", x_axis_label='Time (s)', y_axis_label='Heap (M)',
+            width=800, height=400)
+
+# Before GC
+p1.scatter(x='timestamp', y='before', source=source, legend_label="Before GC", color="red", size=8)
+# After GC
+p1.scatter(x='timestamp', y='after', source=source, legend_label="After GC", color="green", size=8)
+# Line to show progress
+p1.line(x='timestamp', y='after', source=source, legend_label="After GC Trend", color="green", line_dash="dashed")
+
+hover1 = HoverTool(tooltips=[
+    ("Time", "@timestamp{{0.000}}s"),
+    ("Type", "@type"),
+    ("Before", "@before M"),
+    ("After", "@after M"),
+    ("Total", "@total M")
+])
+p1.add_tools(hover1)
+p1.legend.click_policy="hide"
+
+# Plot 2: Pause Times
+p2 = figure(title="GC Pause Times", x_axis_label='Time (s)', y_axis_label='Pause Time (ms)',
+            width=800, height=400, x_range=p1.x_range)
+
+p2.vbar(x='timestamp', top='pause', width=0.01, source=source, color="navy")
+
+hover2 = HoverTool(tooltips=[
+    ("Time", "@timestamp{{0.000}}s"),
+    ("Pause", "@pause ms"),
+    ("Type", "@type")
+])
+p2.add_tools(hover2)
+
+# Layout
+layout = column(p1, p2)
+show(layout)
+"""
+    return code
 
 def plot_gc(data, output_filename="gc_analysis.html"):
     output_file(output_filename)
@@ -106,11 +164,15 @@ if __name__ == "__main__":
     parser.add_argument('--format', choices=['unified', 'java8'], default='unified',
                         help='GC log format: unified (JDK 9+) or java8 (default: unified)')
     parser.add_argument('--output', default='gc_analysis.html', help='Output HTML file name')
+    parser.add_argument('--notebook', action='store_true', help='Generate code for Jupyter Notebook')
     
     args = parser.parse_args()
     
     data = parse_gc_log(args.log_file, args.format)
     if data:
-        plot_gc(data, args.output)
+        if args.notebook:
+            print(generate_notebook_code(data))
+        else:
+            plot_gc(data, args.output)
     else:
         print(f"No GC data found in the log file with format '{args.format}'.")

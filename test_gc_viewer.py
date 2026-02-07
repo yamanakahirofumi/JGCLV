@@ -1,6 +1,6 @@
 import unittest
 import os
-from gc_viewer import parse_gc_log
+from gc_viewer import parse_gc_log, generate_notebook_code
 
 class TestGCViewer(unittest.TestCase):
     def test_parse_java8_format(self):
@@ -39,6 +39,19 @@ class TestGCViewer(unittest.TestCase):
         self.assertIn('timestamp', first_entry)
         self.assertEqual(first_entry['timestamp'], 0.012)
         self.assertEqual(first_entry['pause'], 2.541)
+
+    def test_generate_notebook_code(self):
+        data = [
+            {'timestamp': 0.1, 'type': 'GC', 'before': 10, 'after': 5, 'total': 100, 'pause': 2.0}
+        ]
+        code = generate_notebook_code(data)
+
+        self.assertIsInstance(code, str)
+        self.assertIn('output_notebook()', code)
+        self.assertIn('ColumnDataSource', code)
+        self.assertIn('"timestamp": 0.1', code)
+        self.assertIn('"type": "GC"', code)
+        self.assertIn('show(layout)', code)
 
 if __name__ == '__main__':
     unittest.main()
