@@ -51,6 +51,11 @@ Bokehライブラリを使用して、以下の2つのグラフを含むHTMLフ�
     - 各GCイベントの停止時間を棒グラフ (vbar) で表示します。
     - X軸の範囲はヒープ使用量グラフと同期しています。
 
+### 4.3 Jupyter Notebook向けコード生成 (`generate_notebook_code`)
+- 解析したデータを固定値として埋め込んだPythonコードを生成します。
+- 生成されたコードをJupyter Notebookのセルに貼り付けて実行することで、外部ファイルなしで可視化結果を再現できます。
+- `output_notebook()` を呼び出すことで、ノートブック内にインラインでグラフを表示します。
+
 ## 5. 使用方法 (CLI)
 
 ```bash
@@ -65,6 +70,7 @@ python3 gc_viewer.py <ログファイルパス> [オプション]
   - `unified`: JDK 9以降 (デフォルト)
   - `java8`: JDK 8形式
 - `--output`: 出力するHTMLファイル名を指定します (デフォルト: `gc_analysis.html`)。
+- `--notebook`: Jupyter Notebook用のコードを標準出力に書き出します。このオプションが指定された場合、HTMLファイルは生成されません。
 
 ## 6. 出力物
 - 指定された名前のHTMLファイル (デフォルト: `gc_analysis.html`)。

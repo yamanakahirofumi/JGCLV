@@ -33,7 +33,13 @@ python3 gc_viewer.py path/to/your/gc.log --format java8
 python3 gc_viewer.py path/to/your/gc.log --format unified --output analysis.html
 ```
 
-実行が完了すると、HTMLファイル（デフォルトは `gc_analysis.html`）が生成されます。
+Jupyter Notebook等に貼り付けるためのコードを生成する場合：
+
+```bash
+python3 gc_viewer.py path/to/your/gc.log --format unified --notebook
+```
+
+実行が完了すると、HTMLファイル（デフォルトは `gc_analysis.html`）が生成されます（`--notebook` 指定時は標準出力にコードが表示されます）。
 
 ## 出力
 
