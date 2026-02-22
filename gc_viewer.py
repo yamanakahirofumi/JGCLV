@@ -52,7 +52,7 @@ def parse_gc_log(file_path, log_format):
 def plot_gc(data, output_filename="gc_analysis.html"):
     output_file(output_filename)
     
-    # Convert list of dicts to dict of lists for ColumnDataSource
+    # Convert the list of dicts to dict of lists for ColumnDataSource
     if not data:
         print("No data to plot.")
         return
