@@ -68,8 +68,6 @@ def plot_gc(data, output_filename="gc_analysis.html"):
     p1.scatter(x='timestamp', y='before', source=source, legend_label="Before GC", color="red", size=8)
     # After GC
     p1.scatter(x='timestamp', y='after', source=source, legend_label="After GC", color="green", size=8)
-    # Line to show progress
-    p1.line(x='timestamp', y='after', source=source, legend_label="After GC Trend", color="green", line_dash="dashed")
 
     hover1 = HoverTool(tooltips=[
         ("Time", "@timestamp{0.000}s"),
