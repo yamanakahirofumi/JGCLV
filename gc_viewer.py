@@ -38,6 +38,7 @@ def parse_gc_log(file_path, log_format):
                 item = {
                     'timestamp': float(d['timestamp']),
                     'type': d['type'],
+                    'is_full': 'Full' in d['type'],
                     'before': parse_size(d['before'], d['unit_before']),
                     'after': parse_size(d['after'], d['unit_after']),
                     'total': parse_size(d['total'], d['unit_total']),
@@ -110,12 +111,14 @@ show(layout)
 def plot_gc(data, output_filename="gc_analysis.html"):
     output_file(output_filename)
     
-    # Convert list of dicts to dict of lists for ColumnDataSource
+    # Convert the list of dicts to dict of lists for ColumnDataSource
     if not data:
         print("No data to plot.")
         return
 
     source_data = {k: [d[k] for d in data] for k in data[0].keys()}
+    # Add marker type based on is_full
+    source_data['marker'] = ['diamond' if d['is_full'] else 'circle' for d in data]
     source = ColumnDataSource(source_data)
 
     # Plot 1: Heap Usage
@@ -123,11 +126,11 @@ def plot_gc(data, output_filename="gc_analysis.html"):
                 width=800, height=400)
     
     # Before GC
-    p1.scatter(x='timestamp', y='before', source=source, legend_label="Before GC", color="red", size=8)
+    p1.scatter(x='timestamp', y='before', source=source, legend_label="Before GC", 
+               color="red", size=8, marker='marker')
     # After GC
-    p1.scatter(x='timestamp', y='after', source=source, legend_label="After GC", color="green", size=8)
-    # Line to show progress
-    p1.line(x='timestamp', y='after', source=source, legend_label="After GC Trend", color="green", line_dash="dashed")
+    p1.scatter(x='timestamp', y='after', source=source, legend_label="After GC", 
+               color="green", size=8, marker='marker')
 
     hover1 = HoverTool(tooltips=[
         ("Time", "@timestamp{0.000}s"),
